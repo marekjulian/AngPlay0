@@ -13,9 +13,23 @@
   <link rel="stylesheet" href="bower_components/html5-boilerplate/css/main.css">
   <link rel="stylesheet" href="app.css">
   <script src="bower_components/html5-boilerplate/js/vendor/modernizr-2.6.2.min.js"></script>
+
+   <!-- In production use:
+  <script src="//ajax.googleapis.com/ajax/libs/angularjs/x.x.x/angular.min.js"></script>
+  -->
+  <script src="bower_components/angular/angular.js"></script>
+  <script src="bower_components/angular-route/angular-route.js"></script>
+  <script src="services/game-stats.js"></script>
+  <script src="app-controller.js"></script>
+  <script src="app.js"></script>
+  <script src="rankings/rankings.js"></script>
+  <script src="active-games/active-games.js"></script>
+  <script src="components/version/version.js"></script>
+  <script src="components/version/version-directive.js"></script>
+  <script src="components/version/interpolate-filter.js"></script>
 </head>
-<body>
-  <h1>The Foosball King is:
+<body ng-controller="AppCtrl">
+  <h1>The Foosball King is: {{king}}</h1>
   <ul class="menu">
     <li><a href="#/rankings">Rankings</a></li>
     <li><a href="#/active-games">Active Games</a></li>
@@ -29,16 +43,6 @@
 
   <div>Foosball King: v<span app-version></span></div>
 
-  <!-- In production use:
-  <script src="//ajax.googleapis.com/ajax/libs/angularjs/x.x.x/angular.min.js"></script>
-  -->
-  <script src="bower_components/angular/angular.js"></script>
-  <script src="bower_components/angular-route/angular-route.js"></script>
-  <script src="app.js"></script>
-  <script src="rankings/rankings.js"></script>
-  <script src="active-games/active-games.js"></script>
-  <script src="components/version/version.js"></script>
-  <script src="components/version/version-directive.js"></script>
-  <script src="components/version/interpolate-filter.js"></script>
+ 
 </body>
 </html>

@@ -35,7 +35,10 @@ angular.module('myApp.services.GameStats', []).factory('GameStatsService', [
       PLAYING: 1,
       PLAYED: 2,
       startGame: function() {
-        this.status = (this.status === this.NOT_STARTED) ? this.PLAYING : this.status;
+        if (this.status === this.NOT_STARTED) {
+          this.status = this.PLAYING;
+          onGameStarted(this);
+        }
       },
       updateGame: function(player) {
         if (this.status === this.PLAYING) {
@@ -57,8 +60,8 @@ angular.module('myApp.services.GameStats', []).factory('GameStatsService', [
     function gameFactory(player1, player2) {
       var o = Object.create(gamePrototype);
 
-      o.id = nextGameId;
-      nextGameId++;
+      o.id = nextGameID;
+      nextGameID++;
       o.player1 = player1;
       o.player2 = player2;
       o.score1 = 0;
@@ -71,22 +74,7 @@ angular.module('myApp.services.GameStats', []).factory('GameStatsService', [
     // played: Scores for games previously played. Most recently finished games 
     //  go to the beginning.
     //
-    var played = [
-      { "player1": "Alex", "score1": 4, "player2": "Cathy", "score2": 5 },
-      { "player1": "Alex", "score1": 1, "player2": "Cathy", "score2": 5 },
-      { "player1": "Alex", "score1": 2, "player2": "Cathy", "score2": 5 },
-      { "player1": "Alex", "score1": 0, "player2": "Cathy", "score2": 5 },
-      { "player1":  "Alex", "score1": 6, "player2": "Cathy",  "score2": 5 },
-      { "player1":  "Alex", "score1": 5, "player2": "Cathy",  "score2": 2 },
-      { "player1":  "Alex", "score1": 4, "player2": "Cathy",  "score2": 0 },
-      { "player1":  "Joel" ,  "score1": 4, "player2": "Cathy",  "score2": 5 },
-      { "player1":  "Tim" , "score1": 4, "player2": "Alex", "score2": 5 },
-      { "player1":  "Tim" , "score1": 5, "player2": "Alex", "score2": 2 },
-      { "player1":  "Alex", "score1": 3, "player2": "Tim",    "score2": 5 },
-      { "player1":  "Alex", "score1": 5, "player2": "Tim",    "score2": 3 },
-      { "player1":  "Alex", "score1": 5, "player2": "Joel",   "score2": 4 },
-      { "player1":  "Joel" , "score1": 5, "player2": "Tim",   "score2": 2 }
-    ];
+    var played = [];
 
     //
     // playing: Scores for games being played. Same structure as pastScores,
@@ -133,7 +121,7 @@ angular.module('myApp.services.GameStats', []).factory('GameStatsService', [
     function updateRankings(game) {
       var lp = logPrefix.replace(': ', '.updateRanings: ');
 
-      console.log(lp + 'Rankings being updated...');
+      console.log(lp + 'Rankings being updated, player 1 - ' + game.player1 + ' / ' + game.score1 + ', player 2 - ' + game.player2 + ' / ' + game.score2);
 
       var ranking;
       if (rankingsByPlayer.hasOwnProperty(game.player1)) {
@@ -143,11 +131,12 @@ angular.module('myApp.services.GameStats', []).factory('GameStatsService', [
       else {
         var w = game.score1 > game.score2 ? 1 : 0;
         var l = game.score1 < game.score2 ? 1 : 0;
-        var t = game.score1 === game.score2;
+        var t = game.score1 === game.score2 ? 1 : 0;
         ranking = new Ranking(game.player1, w, l, t);
         rankingsByPlayer[game.player1] = ranking;
         rankings.push(ranking);
       }
+      console.log(lp + 'Ranking for - ' + ranking.player + '(' + ranking.wins + ', ' + ranking.loses + ', ' + ranking.ties + ').');
       if (rankingsByPlayer.hasOwnProperty(game.player2)) {
         ranking = rankingsByPlayer[game.player2];
         ranking.update(game.score2, game.score1);
@@ -155,10 +144,12 @@ angular.module('myApp.services.GameStats', []).factory('GameStatsService', [
       else {
         var w = game.score2 > game.score1 ? 1 : 0;
         var l = game.score2 < game.score1 ? 1 : 0;
-        var t = game.score2 === game.score1;
+        var t = game.score2 === game.score1 ? 1: 0;
         ranking = new Ranking(game.player2, w, l, t);
+        rankingsByPlayer[game.player2] = ranking;
         rankings.push(ranking);
       }
+      console.log(lp + 'Ranking for - ' + ranking.player + '(' + ranking.wins + ', ' + ranking.loses + ', ' + ranking.ties + ').');
       rankings.sort(function(r1, r2) {
         if (r1.wins > r2.wins) {
           return -1;
@@ -185,6 +176,10 @@ angular.module('myApp.services.GameStats', []).factory('GameStatsService', [
       });
     }
 
+    function onGameStarted(game) {
+      playing[game.id] = game;
+    }
+
     function onGameFinished(game) {
       var lp = logPrefix.replace(': ', '.onGameFinshed: ');
 
@@ -200,6 +195,44 @@ angular.module('myApp.services.GameStats', []).factory('GameStatsService', [
         updateRankings(g);
       }
     }
+
+    var seedData = [
+      { "player1": "Alex", "score1": 4, "player2": "Cathy", "score2": 5 },
+      { "player1": "Alex", "score1": 1, "player2": "Cathy", "score2": 5 }
+      { "player1": "Alex", "score1": 2, "player2": "Cathy", "score2": 5 },
+      { "player1": "Alex", "score1": 0, "player2": "Cathy", "score2": 5 },
+      { "player1":  "Alex", "score1": 6, "player2": "Cathy",  "score2": 5 },
+      { "player1":  "Alex", "score1": 5, "player2": "Cathy",  "score2": 2 },
+      { "player1":  "Alex", "score1": 4, "player2": "Cathy",  "score2": 0 },
+      { "player1":  "Joel" ,  "score1": 4, "player2": "Cathy",  "score2": 5 },
+      { "player1":  "Tim" , "score1": 4, "player2": "Alex", "score2": 5 },
+      { "player1":  "Tim" , "score1": 5, "player2": "Alex", "score2": 2 },
+      { "player1":  "Alex", "score1": 3, "player2": "Tim",    "score2": 5 },
+      { "player1":  "Alex", "score1": 5, "player2": "Tim",    "score2": 3 },
+      { "player1":  "Alex", "score1": 5, "player2": "Joel",   "score2": 4 },
+      { "player1":  "Joel" , "score1": 5, "player2": "Tim",   "score2": 2 }
+    ];
+
+    function init() {
+      var lp = logPrefix.replace(': ', '.init: ');
+
+      for (var i = 0; i < seedData.length; i++) {
+        var seed = seedData[i];
+        var game = gameFactory(seed.player1, seed.player2);
+        game.startGame();
+        game.score1 = seed.score1;
+        game.score2 = seed.score2;
+        game.finishGame();
+      }
+
+      for (var i = 0; i < rankings.length; i++) {
+        var ranking = rankings[i];
+
+        console.log(lp + ranking.player + '(' + ranking.wins + ', ' + ranking.loses + ', ' + ranking.ties + ').');
+      }
+    }
+
+    init();
 
     return {
       rankings: rankings,
